@@ -9,8 +9,8 @@ public class Dijkstra {
     // a b s
     // ...
     // start
-    public static void main(String[] args) {
-        try (FileInputStream stream = new FileInputStream("input.txt")) {
+    public static TestData readGraph(String name) {
+        try (FileInputStream stream = new FileInputStream(name)) {
             Scanner scanner = new Scanner(stream);
             Map<Integer, List<Edge>> graph = new HashMap<>();
             int n = scanner.nextInt();
@@ -23,14 +23,26 @@ public class Dijkstra {
                 addChild(b, a, s, graph);
             }
             int start = scanner.nextInt();
-            Map<Integer, Integer> shortestDistances = dijkstra(start, graph);
-            for (Map.Entry<Integer, Integer> entry : shortestDistances.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-            }
+
+            return new TestData(graph, start);
 
         } catch (IOException e) {
+
             e.printStackTrace();
+            return null;
         }
+    }
+
+    public static void main(String[] args) {
+        TestData testData = readGraph("input.txt");
+
+
+        Map<Integer, Integer> shortestDistances = dijkstra(testData.start, testData.graph);
+        for (Map.Entry<Integer, Integer> entry : shortestDistances.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+
+
     }
 
     private static void addChild(int a, int b, int s, Map<Integer, List<Edge>> graph) {
@@ -46,7 +58,7 @@ public class Dijkstra {
         }
     }
 
-    private static Map<Integer, Integer> dijkstra(int start, Map<Integer, List<Edge>> graph) {
+    public static Map<Integer, Integer> dijkstra(int start, Map<Integer, List<Edge>> graph) {
 
         PriorityQueue<Node> queue = new PriorityQueue<>();
         queue.add(new Node(start, 0));
@@ -82,5 +94,14 @@ public class Dijkstra {
     }
 
 
+    public static class TestData {
+        final Map<Integer, List<Edge>> graph;
+        final int start;
+
+        TestData(Map<Integer, List<Edge>> graph, int start) {
+            this.graph = graph;
+            this.start = start;
+        }
+    }
 
 }
