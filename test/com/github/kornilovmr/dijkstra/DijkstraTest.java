@@ -13,10 +13,15 @@ public class DijkstraTest {
 
     @Test
     public void testSimple() {
-        tester("simple");
+        dotest("simple");
     }
 
-    public void tester(String nameTest) {
+    @Test
+    public void simpleTestFirstData() {
+        dotest("simpleTestFirstData");
+    }
+
+    public void dotest(String nameTest) {
         Dijkstra.TestData test = Dijkstra.readGraph("testData/" + nameTest + ".txt");
         Map<Integer, Integer> shortestDistances = Dijkstra.dijkstra(test.start, test.graph);
         try (FileInputStream stream = new FileInputStream("testData/" + nameTest + ".expected.txt")) {
