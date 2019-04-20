@@ -23,15 +23,16 @@ public class DijkstraTest {
 
     public void dotest(String nameTest) {
         Dijkstra.TestData test = Dijkstra.readGraph("testData/" + nameTest + ".txt");
-        Map<Integer, Integer> shortestDistances = Dijkstra.dijkstra(test.start, test.graph);
+        Map<Integer, Dijkstra.Result> shortestDistances = Dijkstra.dijkstra(test.start, test.graph);
         try (FileInputStream stream = new FileInputStream("testData/" + nameTest + ".expected.txt")) {
             Scanner scanner = new Scanner(stream);
-            Map<Integer, Integer> expectedShortestDistance = new HashMap<>();
+            Map<Integer, Dijkstra.Result> expectedShortestDistance = new HashMap<>();
             int n = scanner.nextInt();
             for (int i = 0; i < n; i++) {
                 int id = scanner.nextInt();
                 int distance = scanner.nextInt();
-                expectedShortestDistance.put(id, distance);
+                int prNode = scanner.nextInt();
+                expectedShortestDistance.put(id, new Dijkstra.Result(prNode, distance));
             }
             Assert.assertEquals(expectedShortestDistance, shortestDistances);
         } catch (IOException e) {

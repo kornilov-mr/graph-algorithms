@@ -37,12 +37,23 @@ public class Dijkstra {
         TestData testData = readGraph("input.txt");
 
 
-        Map<Integer, Integer> shortestDistances = dijkstra(testData.start, testData.graph);
-        for (Map.Entry<Integer, Integer> entry : shortestDistances.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+        Map<Integer, Result> shortestDistances = dijkstra(testData.start, testData.graph);
+
+
+        for (Map.Entry<Integer, Result> entry : shortestDistances.entrySet()) {
+            Result result = entry.getValue();
+            System.out.println(entry.getKey() + ". Distance:" + result.shortestDistance + " path: " + buildPath(shortestDistances, entry.getKey()));
         }
 
 
+    }
+
+    private static List<Integer> buildPath(Map<Integer, Result> shortestDistances, int node) {
+        int prNode = shortestDistances.get(node).previousNode;
+        if (prNode == -1) return new ArrayList<>();
+        List<Integer> path = buildPath(shortestDistances, prNode);
+        path.add(prNode);
+        return path;
     }
 
     private static void addChild(int a, int b, int s, Map<Integer, List<Edge>> graph) {
@@ -58,24 +69,24 @@ public class Dijkstra {
         }
     }
 
-    public static Map<Integer, Integer> dijkstra(int start, Map<Integer, List<Edge>> graph) {
+    public static Map<Integer, Result> dijkstra(int start, Map<Integer, List<Edge>> graph) {
 
         PriorityQueue<Node> queue = new PriorityQueue<>();
         queue.add(new Node(start, 0));
 
-        Map<Integer, Integer> shortestDistances = new HashMap<>();
+        Map<Integer, Result> shortestDistances = new HashMap<>();
         for (Integer nodeId : graph.keySet()) {
-            shortestDistances.put(nodeId, Integer.MAX_VALUE);
+            shortestDistances.put(nodeId, new Result(-1, Integer.MAX_VALUE));
         }
-        shortestDistances.put(start, 0);
+        shortestDistances.put(start, new Result(-1, 0));
         Set<Integer> checked = new HashSet<>();
         while (!queue.isEmpty()) {
-            dostep(graph, queue, shortestDistances, checked);
+            doStep(graph, queue, shortestDistances, checked);
         }
         return shortestDistances;
     }
 
-    private static void dostep(Map<Integer, List<Edge>> graph, PriorityQueue<Node> queue, Map<Integer, Integer> shortestDistances, Set<Integer> checked) {
+    private static void doStep(Map<Integer, List<Edge>> graph, PriorityQueue<Node> queue, Map<Integer, Result> shortestDistances, Set<Integer> checked) {
         Node other = queue.poll();
         assert other != null;
         checked.add(other.nodeId);
@@ -83,18 +94,18 @@ public class Dijkstra {
         List<Edge> edges = graph.get(other.nodeId);
         for (Edge edge : edges) {
             if (checked.contains(edge.childId)) continue;
-            int childDistence = shortestDistancesForStep + edge.length;
-            int oldDistance = shortestDistances.get(edge.childId);
-            if (childDistence < oldDistance) {
-                queue.remove(new Node(edge.childId, oldDistance));
-                shortestDistances.put(edge.childId, childDistence);
-                queue.add(new Node(edge.childId, childDistence));
+            int childDistance = shortestDistancesForStep + edge.length;
+            Result oldDistance = shortestDistances.get(edge.childId);
+            if (childDistance < oldDistance.shortestDistance) {
+                queue.remove(new Node(edge.childId, oldDistance.shortestDistance));
+                shortestDistances.put(edge.childId, new Result(other.nodeId, childDistance));
+                queue.add(new Node(edge.childId, childDistance));
             }
         }
     }
 
 
-    public static class TestData {
+    static class TestData {
         final Map<Integer, List<Edge>> graph;
         final int start;
 
@@ -103,5 +114,28 @@ public class Dijkstra {
             this.start = start;
         }
     }
+
+    public static class Result {
+        final int previousNode;
+        final int shortestDistance;
+
+        Result(int previousNode, int shortestDistance) {
+            this.previousNode = previousNode;
+            this.shortestDistance = shortestDistance;
+        }
+
+        @Override
+        public String toString() {
+            return "(distance: " + shortestDistance + ", previousNode: " + previousNode + ")";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Result)) return false;
+            return this.previousNode == ((Result) obj).previousNode && this.shortestDistance == ((Result) obj).shortestDistance;
+        }
+    }
+
 
 }
